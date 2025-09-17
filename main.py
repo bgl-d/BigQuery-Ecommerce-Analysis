@@ -1,6 +1,6 @@
 from src.load_data import load_data
 from src.data_preprocessing import data_inspection
-from src.analysis import metrics
+from src.analysis import sales_metrics, traffic_metrics, merge_metrics
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -19,6 +19,8 @@ def main():
                         o.user_id,
                         o.product_id,
                         DATE(o.created_at) AS date,
+                        FORMAT_DATE('%Y-%m', o.created_at) AS month,
+                        FORMAT_DATE('%Y', o.created_at) AS year,
                         o.status,
                         o.sale_price * num_o.num_of_item AS sales,
                         inv.product_name
@@ -34,6 +36,8 @@ def main():
                         SELECT session_id,
                             user_id,
                             DATE(created_at) as date,
+                            FORMAT_DATE('%Y-%m', created_at) AS month,
+                            FORMAT_DATE('%Y', created_at) AS year,
                             city,
                             state,
                             traffic_source,
@@ -42,16 +46,18 @@ def main():
                         WHERE DATE(created_at) < current_date
                     '''
     # Load data
-    df_sessions = load_data(sessions_query)
-    df_orders = load_data(orders_query)
+    df_traffic = load_data(sessions_query)
+    df_sales = load_data(orders_query)
 
     # Data cleaning
-    df_sessions = data_inspection(df_sessions)
-    df_orders = data_inspection(df_orders)
+    df_traffic = data_inspection(df_traffic)
+    df_sales = data_inspection(df_sales)
 
     # Calculate key metrics at the end of previous month
-    df_metrics = metrics(df_orders, df_sessions)
-    print(df_metrics[df_metrics.index.year == 2025])
+    dimension = 'month'
+    df_sales_metrics = sales_metrics(df_sales, dimension)
+    df_traffic_metrics = traffic_metrics(df_traffic, [dimension])
+    df_metrics = merge_metrics(df_sales_metrics, df_traffic_metrics)
 
     # Visualising key metrics
     fig = px.line(df_metrics[df_metrics.index < '2025-09-01'],
