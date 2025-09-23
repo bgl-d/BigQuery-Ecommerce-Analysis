@@ -13,8 +13,4 @@ def load_data(query):
     # Execute the query and load results into a Pandas DataFrame
     df = client.query(query)
     df = df.to_dataframe()
-
-    # Save table data in .csv file
-    df.name = get_query_tables(query)[0].rsplit('.', 1)[-1]
-    df['date'] = pd.to_datetime(df['date'])
     return df

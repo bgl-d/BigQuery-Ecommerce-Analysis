@@ -1,39 +1,75 @@
 import pandas as pd
+from src.load_data import load_data
 
 
-def sales_metrics(df_sales, dimension):
-    # Calculate total sales, number of orders, AOV
-    order_metrics = df_sales.groupby(dimension).agg(
-        num_orders=('order_id', 'nunique'),
-        revenue=('sales', 'sum')
-    )
-    order_metrics['aov'] = order_metrics['revenue'] / order_metrics['num_orders']
+def seasonality(granularity, start_date, end_date):
+    seasonality_query = f'''
+                            WITH orders AS (
+                              SELECT
+                                FORMAT_DATE('{granularity}', created_at) AS Period,
+                                SUM(sale_price) AS Revenue,
+                                SUM(sale_price)/COUNT(DISTINCT order_id) AS AOV,
+                                COUNT(DISTINCT user_id) AS UniqueUsers
+                              FROM `bigquery-public-data.thelook_ecommerce.order_items`
+                              WHERE status = 'Complete' AND DATE(created_at) BETWEEN '{start_date}' AND '{end_date}'
+                              GROUP BY Period
+                            ),
 
-    # Top-selling products
-    revenue_per_item = df_sales.groupby([dimension, 'product_name']).agg(
-        top_product_revenue=('sales', 'sum')
-    )
-    bestseller = (revenue_per_item.loc[revenue_per_item
-                  .groupby(dimension)['top_product_revenue'].idxmax()]
-                  .reset_index('product_name'))
-    bestseller = bestseller.rename(columns={'product_name': 'bestseller'})
-    grouped_sales = pd.merge(order_metrics, bestseller, on=dimension, how='left')
-    return grouped_sales
+                            traffic AS (
+                              SELECT 
+                                FORMAT_DATE('{granularity}', created_at) AS Period,
+                                (COUNT(DISTINCT CASE WHEN event_type = 'purchase' THEN session_id END)*100/
+                                COUNT(session_id)) AS ConversionRate
+                              FROM `bigquery-public-data.thelook_ecommerce.events`
+                              WHERE DATE(created_at) BETWEEN '{start_date}' AND '{end_date}'
+                              GROUP BY Period
+                            )
+                            
+                            SELECT 
+                              o.Period,
+                              o.Revenue,
+                              o.AOV,
+                              o.UniqueUsers,
+                              t.ConversionRate
+                            FROM orders AS o
+                            LEFT JOIN traffic AS t
+                              ON o.Period = t.Period
+                            ORDER BY o.Period DESC
+                        '''
+    metrics_by_month = load_data(seasonality_query)
+    print(metrics_by_month)
 
 
-def traffic_metrics(df_traffic, dimension):
-    # Calculate number of sessions, conversion rate, cart abandonment rate
-    grouped_traffic = df_traffic.groupby(dimension).agg(
-        num_sessions=('session_id', 'nunique'),
-        num_purchases=('event_type', lambda x: (x == 'purchase').sum()),
-        num_created_carts=('event_type', lambda x: (x == 'cart').sum())
-    )
-    grouped_traffic['cvr'] = grouped_traffic['num_purchases'] * 100 / grouped_traffic['num_sessions']
-    grouped_traffic['car'] = ((grouped_traffic['num_created_carts'] - grouped_traffic['num_purchases']) * 100
-                              / grouped_traffic['num_sessions'])
-    return grouped_traffic
+def products(start_date, end_date):
+    products_query = f'''
+                            SELECT 
+                              inv.product_name,
+                              sum(o.sale_price) as Revenue,
+                              sum(o.sale_price)/count(o.order_id) as AOV,
+                              sum(o.sale_price) * 100 / SUM(SUM(o.sale_price)) OVER() as Percentage_of_TotalRevenue
+                            FROM `bigquery-public-data.thelook_ecommerce.order_items` AS o
+                            LEFT JOIN (select product_name, id
+                                        FROM `bigquery-public-data.thelook_ecommerce.inventory_items` 
+                                        GROUP BY product_name, id) AS inv 
+                                ON o.inventory_item_id = inv.id
+                            WHERE o.status = 'Complete' AND DATE(o.created_at) BETWEEN '{start_date}' AND '{end_date}'
+                            GROUP BY inv.product_name
+                            ORDER BY sum(o.sale_price) DESC
+                        '''
+    metrics_by_products = load_data(products_query)
+    print(metrics_by_products.head())
 
 
-def merge_metrics(sales, traffic):
-    df_metrics = pd.merge(sales, traffic, left_index=True, right_index=True)
-    return df_metrics
+def acquisition_channels(start_date, end_date):
+    acquisition_channels_query = f'''
+                                SELECT traffic_source,
+                                  COUNT(DISTINCT session_id) as GeneratedTraffic,
+                                  (COUNT(DISTINCT CASE WHEN event_type = 'purchase' THEN session_id END)*100/
+                                  COUNT(session_id)) AS ConversionRate
+                                FROM `bigquery-public-data.thelook_ecommerce.events`
+                                WHERE DATE(created_at) BETWEEN '{start_date}' AND '{end_date}'
+                                GROUP BY traffic_source
+                                ORDER BY COUNT(DISTINCT session_id) DESC
+                            '''
+    acquisition_channels_metrics = load_data(acquisition_channels_query)
+    print(acquisition_channels_metrics.head())
