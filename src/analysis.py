@@ -34,7 +34,6 @@ def seasonality(granularity, start_date, end_date):
                             FROM orders AS o
                             LEFT JOIN traffic AS t
                               ON o.Period = t.Period
-                            ORDER BY o.Period DESC
                         '''
     metrics_by_month = load_data(seasonality_query)
     print(metrics_by_month)
@@ -46,12 +45,13 @@ def products(start_date, end_date):
                               inv.product_name,
                               sum(o.sale_price) as Revenue,
                               sum(o.sale_price)/count(o.order_id) as AOV,
-                              sum(o.sale_price) * 100 / SUM(SUM(o.sale_price)) OVER() as Percentage_of_TotalRevenue
+                              sum(o.sale_price) * 100 / SUM(SUM(o.sale_price)) OVER() as Contribution_to_Revenue
                             FROM `bigquery-public-data.thelook_ecommerce.order_items` AS o
                             LEFT JOIN (select product_name, id
-                                        FROM `bigquery-public-data.thelook_ecommerce.inventory_items` 
+                                        FROM `bigquery-public-data.thelook_ecommerce.inventory_items`
+                                        WHERE created_at BETWEEN '{start_date}' AND '{end_date}'
                                         GROUP BY product_name, id) AS inv 
-                                ON o.inventory_item_id = inv.id
+                                ON o.product_id = inv.id
                             WHERE o.status = 'Complete' AND DATE(o.created_at) BETWEEN '{start_date}' AND '{end_date}'
                             GROUP BY inv.product_name
                             ORDER BY sum(o.sale_price) DESC
@@ -64,6 +64,7 @@ def acquisition_channels(start_date, end_date):
     acquisition_channels_query = f'''
                                 SELECT traffic_source,
                                   COUNT(DISTINCT session_id) as GeneratedTraffic,
+                                  COUNT(DISTINCT user_id) as UniqueUsers,
                                   (COUNT(DISTINCT CASE WHEN event_type = 'purchase' THEN session_id END)*100/
                                   COUNT(session_id)) AS ConversionRate
                                 FROM `bigquery-public-data.thelook_ecommerce.events`

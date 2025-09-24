@@ -12,8 +12,8 @@ def main():
     np.set_printoptions(linewidth=400)
 
     # Choose period
-    start_date = '2025-08-01'
-    end_date = '2025-08-31'
+    start_date = '2025-01-01'
+    end_date = '2025-06-30'
 
     # Metrics by month
     seasonality('%Y-%m', start_date, end_date)
