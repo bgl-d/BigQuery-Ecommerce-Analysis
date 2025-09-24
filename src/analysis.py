@@ -14,7 +14,6 @@ def seasonality(granularity, start_date, end_date):
                               WHERE status = 'Complete' AND DATE(created_at) BETWEEN '{start_date}' AND '{end_date}'
                               GROUP BY Period
                             ),
-
                             traffic AS (
                               SELECT 
                                 FORMAT_DATE('{granularity}', created_at) AS Period,
@@ -62,15 +61,34 @@ def products(start_date, end_date):
 
 def acquisition_channels(start_date, end_date):
     acquisition_channels_query = f'''
-                                SELECT traffic_source,
-                                  COUNT(DISTINCT session_id) as GeneratedTraffic,
-                                  COUNT(DISTINCT user_id) as UniqueUsers,
-                                  (COUNT(DISTINCT CASE WHEN event_type = 'purchase' THEN session_id END)*100/
-                                  COUNT(session_id)) AS ConversionRate
-                                FROM `bigquery-public-data.thelook_ecommerce.events`
-                                WHERE DATE(created_at) BETWEEN '{start_date}' AND '{end_date}'
-                                GROUP BY traffic_source
-                                ORDER BY COUNT(DISTINCT session_id) DESC
+                                WITH first_touch AS(
+                                  SELECT user_id, 
+                                    min(created_at) as first_touch
+                                  FROM `bigquery-public-data.thelook_ecommerce.events`
+                                  WHERE DATE(created_at) BETWEEN '{start_date}' AND '{end_date}'
+                                  GROUP BY user_id
+                                  
+                                ),
+                                first_touch_source AS(
+                                  SELECT f.user_id, 
+                                    e.traffic_source
+                                  FROM first_touch as f
+                                  JOIN `bigquery-public-data.thelook_ecommerce.events` as e
+                                    ON f.user_id = e.user_id AND f.first_touch = e.created_at
+                                )
+    
+                                SELECT f_s.traffic_source,
+                                  COUNT(DISTINCT e.session_id) as GeneratedTraffic,
+                                  COUNT(DISTINCT e.user_id) as UniqueUsers,
+                                  (COUNT(DISTINCT CASE WHEN e.event_type = 'purchase' THEN e.session_id END)*100/
+                                  COUNT(e.session_id)) AS ConversionRate,
+                                  COUNT(f_s.user_id) as NumberOfFirstTouches
+                                FROM `bigquery-public-data.thelook_ecommerce.events` AS e
+                                JOIN first_touch_source as f_s
+                                    ON e.user_id = f_s.user_id
+                                WHERE DATE(e.created_at) BETWEEN '{start_date}' AND '{end_date}'
+                                GROUP BY f_s.traffic_source
+                                ORDER BY COUNT(DISTINCT e.session_id) DESC
                             '''
     acquisition_channels_metrics = load_data(acquisition_channels_query)
     print(acquisition_channels_metrics.head())
