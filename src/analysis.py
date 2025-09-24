@@ -1,7 +1,6 @@
 import pandas as pd
 from src.load_data import load_data
 
-
 def seasonality(granularity, start_date, end_date):
     seasonality_query = f'''
                             WITH orders AS (
@@ -33,7 +32,7 @@ def seasonality(granularity, start_date, end_date):
                             FROM orders AS o
                             LEFT JOIN traffic AS t
                               ON o.Period = t.Period
-                        '''
+    '''
     metrics_by_month = load_data(seasonality_query)
     print(metrics_by_month)
 
@@ -54,7 +53,7 @@ def products(start_date, end_date):
                             WHERE o.status = 'Complete' AND DATE(o.created_at) BETWEEN '{start_date}' AND '{end_date}'
                             GROUP BY inv.product_name
                             ORDER BY sum(o.sale_price) DESC
-                        '''
+    '''
     metrics_by_products = load_data(products_query)
     print(metrics_by_products.head())
 
@@ -89,6 +88,20 @@ def acquisition_channels(start_date, end_date):
                                 WHERE DATE(e.created_at) BETWEEN '{start_date}' AND '{end_date}'
                                 GROUP BY f_s.traffic_source
                                 ORDER BY COUNT(DISTINCT e.session_id) DESC
-                            '''
+    '''
     acquisition_channels_metrics = load_data(acquisition_channels_query)
-    print(acquisition_channels_metrics.head())
+    print(acquisition_channels_metrics)
+
+
+def customers(start_date, end_date):
+    customers_query = f'''
+                            SELECT user_id,
+                                SUM(sale_price) as CustomerRevenue
+                            FROM `bigquery-public-data.thelook_ecommerce.order_items`
+                            WHERE DATE(created_at) BETWEEN '{start_date}' AND '{end_date}'
+                            GROUP BY user_id
+                            ORDER BY CustomerRevenue DESC
+                            LIMIT 1000
+    '''
+    customers_metrics = load_data(customers_query)
+    print(customers_metrics.head())

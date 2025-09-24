@@ -1,4 +1,4 @@
-from src.analysis import seasonality, products, acquisition_channels
+from src.analysis import seasonality, products, acquisition_channels, customers
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -23,6 +23,9 @@ def main():
 
     # Metrics by acquisition channel
     acquisition_channels(start_date, end_date)
+
+    # Customer metrics
+    customers(start_date, end_date)
 
 
 if __name__ == '__main__':
