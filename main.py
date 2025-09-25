@@ -13,7 +13,7 @@ def main():
 
     # Choose period
     start_date = '2025-01-01'
-    end_date = '2025-06-30'
+    end_date = '2025-09-30'
 
     # Metrics by month
     seasonality('%Y-%m', start_date, end_date)
