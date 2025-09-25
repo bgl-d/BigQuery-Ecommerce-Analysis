@@ -86,14 +86,50 @@ def acquisition_channels(start_date, end_date):
 
 def customers(start_date, end_date):
     customers_query = f'''
-                            SELECT user_id,
-                                SUM(sale_price) as CustomerRevenue
-                                COUNT(DISTINCT order_id)
-                            FROM `bigquery-public-data.thelook_ecommerce.order_items`
-                            WHERE DATE(created_at) BETWEEN '{start_date}' AND '{end_date}'
-                            GROUP BY user_id
+                            WITH first_purchase AS(
+                              SELECT user_id, created_at, traffic_source
+                              FROM (SELECT *,
+                                      ROW_NUMBER() OVER(PARTITION BY user_id ORDER BY created_at ASC) AS row_num,
+                                    FROM `bigquery-public-data.thelook_ecommerce.events`
+                                    WHERE event_type = 'purchase'
+                              )
+                              WHERE row_num = 1
+                            ),
+                            last_purchase AS(
+                              SELECT user_id, created_at, traffic_source
+                              FROM (SELECT *,
+                                      ROW_NUMBER() OVER(PARTITION BY user_id ORDER BY created_at DESC) AS row_num,
+                                    FROM `bigquery-public-data.thelook_ecommerce.events`
+                                    WHERE event_type = 'purchase'
+                              )
+                              WHERE row_num = 1
+                            ),
+                            revenue AS(
+                              SELECT user_id,
+                                SUM(sale_price) as CustomerRevenue,
+                                COUNT(DISTINCT order_id) as NumOrders
+                              FROM `bigquery-public-data.thelook_ecommerce.order_items`
+                              GROUP BY user_id
+                            )
+                            
+                            SELECT
+                              u.first_name, 
+                              u.last_name,
+                              u.city,
+                              u.country,
+                              r.CustomerRevenue,
+                              r.NumOrders,
+                              f.traffic_source as FirstPurchaseTrafficSource,
+                              f.created_at as FirstPurchase,
+                              l.created_at as LastPurchase
+                            FROM `bigquery-public-data.thelook_ecommerce.users` as u
+                            JOIN first_purchase as f
+                              ON u.id = f.user_id
+                            JOIN last_purchase as l
+                              ON u.id = l.user_id
+                            JOIN revenue AS r
+                              ON u.id = r.user_id
                             ORDER BY CustomerRevenue DESC
-                            LIMIT 1000
     '''
     customers_metrics = load_data(customers_query)
     print(customers_metrics.head())
