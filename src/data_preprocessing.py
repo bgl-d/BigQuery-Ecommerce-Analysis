@@ -12,16 +12,4 @@ def data_inspection(df):
     # Duplicates
     if df.duplicated().sum() != 0:
         df = df.drop_duplicates()
-
-    # Sort by dates
-    df = df.sort_values('date')
-
-    # Days between purchases, website visits
-    df['previous_visit'] = df.groupby(['user_id'])['date'].shift()
-    df['days_btwn_visits'] = df['date'] - df['previous_visit']
-    df['days_btwn_visits'] = df['days_btwn_visits'].apply(lambda x: x.days)
-    df['AvgDaysBetween'] = df[df['days_btwn_visits'] > 0].groupby('user_id')['days_btwn_visits'].mean()
-
-    # print data
-    print(df.head())
     return df

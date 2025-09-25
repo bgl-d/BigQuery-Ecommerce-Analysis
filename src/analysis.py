@@ -30,7 +30,7 @@ def seasonality(granularity, start_date, end_date):
                               o.UniqueUsers,
                               t.ConversionRate
                             FROM orders AS o
-                            LEFT JOIN traffic AS t
+                            JOIN traffic AS t
                               ON o.Period = t.Period
                             ORDER BY o.Period
     '''
@@ -88,6 +88,7 @@ def customers(start_date, end_date):
     customers_query = f'''
                             SELECT user_id,
                                 SUM(sale_price) as CustomerRevenue
+                                COUNT(DISTINCT order_id)
                             FROM `bigquery-public-data.thelook_ecommerce.order_items`
                             WHERE DATE(created_at) BETWEEN '{start_date}' AND '{end_date}'
                             GROUP BY user_id
