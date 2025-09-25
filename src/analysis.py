@@ -35,7 +35,8 @@ def seasonality(granularity, start_date, end_date):
                             ORDER BY o.Period
     '''
     metrics_by_month = load_data(seasonality_query)
-    print(metrics_by_month)
+    print(metrics_by_month.head())
+    return metrics_by_month
 
 
 def products(start_date, end_date):
@@ -66,22 +67,25 @@ def products(start_date, end_date):
     '''
     metrics_by_products = load_data(products_query)
     print(metrics_by_products.head())
+    return metrics_by_products
 
 
-def acquisition_channels(start_date, end_date):
+def acquisition_channels(granularity, start_date, end_date):
     acquisition_channels_query = f'''
                                 SELECT traffic_source,
                                   COUNT(DISTINCT session_id) as GeneratedTraffic,
                                   COUNT(DISTINCT user_id) as UniqueUsers,
                                   (COUNT(DISTINCT CASE WHEN event_type = 'purchase' THEN session_id END)*100/
-                                  COUNT(DISTINCT session_id)) AS ConversionRate,                                  
+                                  COUNT(DISTINCT session_id)) AS ConversionRate,
+                                  FORMAT_DATE('{granularity}', created_at) AS Period                               
                                 FROM `bigquery-public-data.thelook_ecommerce.events`                                
                                 WHERE DATE(created_at) BETWEEN '{start_date}' AND '{end_date}'
-                                GROUP BY traffic_source
+                                GROUP BY traffic_source, Period
                                 ORDER BY GeneratedTraffic DESC
     '''
     acquisition_channels_metrics = load_data(acquisition_channels_query)
-    print(acquisition_channels_metrics)
+    print(acquisition_channels_metrics.head())
+    return acquisition_channels_metrics
 
 
 def customers(start_date, end_date):
@@ -133,3 +137,4 @@ def customers(start_date, end_date):
     '''
     customers_metrics = load_data(customers_query)
     print(customers_metrics.head())
+    return customers_metrics

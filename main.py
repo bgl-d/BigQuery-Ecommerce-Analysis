@@ -13,19 +13,29 @@ def main():
 
     # Choose period
     start_date = '2025-01-01'
-    end_date = '2025-09-30'
+    end_date = '2025-06-30'
 
     # Metrics by month
-    seasonality('%Y-%m', start_date, end_date)
+    metrics_by_period = seasonality('%Y-%m', start_date, end_date)
 
     # Metrics by product
-    products(start_date, end_date)
+    metrics_by_products = products(start_date, end_date)
 
     # Metrics by acquisition channel
-    acquisition_channels(start_date, end_date)
+    acquisition_channels_metrics = acquisition_channels('%Y-%m', start_date, end_date)
 
     # Customer metrics
-    customers(start_date, end_date)
+    customers_metrics = customers(start_date, end_date)
+
+    # Visualising key metrics
+    fig = px.histogram(metrics_by_period,
+                       x=metrics_by_period['Period'],
+                       y='Revenue')
+    fig.show()
+    fig_hist = px.histogram(acquisition_channels_metrics,
+                            x='Period',
+                            y='GeneratedTraffic', color='traffic_source', barmode='group')
+    fig_hist.show()
 
 
 if __name__ == '__main__':
