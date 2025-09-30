@@ -46,15 +46,17 @@ def products(start_date, end_date):
                                 SELECT CASE WHEN product_name IS NULL OR product_name = '' THEN CAST(o.product_id AS STRING)
                                             ELSE product_name
                                        END AS product_name,
-                                       o.product_id
+                                       o.product_id,
+                                       product_category
                                 FROM `bigquery-public-data.thelook_ecommerce.order_items` AS o
                                 LEFT JOIN `bigquery-public-data.thelook_ecommerce.inventory_items` AS inv
                                   ON o.product_id = inv.product_id
-                                GROUP BY product_name, product_id
+                                GROUP BY product_name, product_id, product_category
                             )
                             
                             SELECT
                               n.product_name,
+                              n.product_category,
                               SUM(o.sale_price) AS Revenue,
                               COUNT(o.order_id) AS ItemsSold,
                               SUM(o.sale_price) * 100 / SUM(SUM(o.sale_price)) OVER() AS Contribution_to_Revenue
@@ -63,7 +65,7 @@ def products(start_date, end_date):
                               ON o.product_id = n.product_id
                             WHERE o.status = 'Complete' 
                               AND DATE(o.created_at) BETWEEN '{start_date}' AND '{end_date}'
-                            GROUP BY n.product_name
+                            GROUP BY n.product_name, n.product_category
                             ORDER BY Revenue DESC
     '''
     products_dimension = load_data(products_query)

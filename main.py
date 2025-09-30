@@ -15,37 +15,57 @@ def main():
     start_date = '2025-01-01'
     end_date = '2025-06-30'
 
-    # Calculate time-based metrics
+    # Aggregate data and calculate metrics
+    # Time-based data
     time_based_dimension = time_based('%Y-%m', start_date, end_date)
 
-    # Calculate product metrics
-    product_metrics = products(start_date, end_date)
+    # Product data
+    products_dimension = products(start_date, end_date)
 
-    # Calculate acquisition channel metrics
+    # Acquisition channels data
     acquisition_channels_dimension = acquisition_channels('%Y-%m', start_date, end_date)
 
-    # Calculate customer metrics
+    # Customer data
     customers_dimension = customers()
 
-    # Visualisations
+    # Charts
+    # Revenue in 2025
     revenue_fig = px.histogram(time_based_dimension,
                        x='Period',
                        y='Revenue', nbins=8)
     revenue_fig.update_layout(bargap=0.2)
     revenue_fig.show()
 
+    # Acquisitions channels traffic in 2025
     acquisition_channels_fig = px.histogram(acquisition_channels_dimension,
                             x='Period',
                             y='GeneratedTraffic', color='traffic_source', barmode='group', nbins=8)
     acquisition_channels_fig.show()
 
+    # Average numebr days between purchases
     customers_fig = px.histogram(customers_dimension,
                                  x='AvgPurchaseInterval')
+    customers_fig.show()
+
+    # Total number of orders from an individual customer
     customers_fig2 = px.histogram(customers_dimension,
                                  x='NumOrders')
     customers_fig2.update_layout(bargap=0.1)
-    customers_fig.show()
     customers_fig2.show()
+
+    # Top 10 product categories
+    categories = (products_dimension[['product_category', 'Revenue']].groupby('product_category').sum()
+                  .sort_values(by='Revenue', ascending=False).reset_index())
+    categories_fig = px.histogram(categories.head(10),
+                                  x='product_category',
+                                  y='Revenue')
+    categories_fig.show()
+
+    # 10 top-selling items
+    products_fig = px.histogram(products_dimension.head(10),
+                                x='product_name',
+                                y='Revenue')
+    products_fig.show()
 
 
 if __name__ == '__main__':
