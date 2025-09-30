@@ -31,7 +31,7 @@ Data aggrigated by different dimensions:
 
 Metrics: Revenue, AOV, Unique Users, Conversion Rate
 
-(picture) Revenue in the first half of 2025
+![alt text]([graphs/Revenue in the first half of 2025.png]) Revenue in the first half of 2025
 (picture) Traffic in the first half of 2025
 (picture) Conversion rates in the first half of 2025
 
