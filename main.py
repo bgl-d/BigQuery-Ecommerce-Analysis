@@ -36,13 +36,25 @@ def main():
     revenue_fig.update_layout(bargap=0.2)
     revenue_fig.show()
 
-    # Acquisitions channels traffic in 2025
-    acquisition_channels_fig = px.histogram(acquisition_channels_dimension,
+    # Acquisitions channels traffic in 2025 by month
+    traffic_by_month_fig = px.histogram(acquisition_channels_dimension,
                             x='Period',
                             y='GeneratedTraffic', color='traffic_source', barmode='group', nbins=8)
-    acquisition_channels_fig.show()
+    traffic_by_month_fig.show()
 
-    # Average numebr days between purchases
+    # Acquisitions channels traffic in 2025
+    channel_traffic_fig = px.histogram(acquisition_channels('%Y', start_date, end_date),
+                                            x='traffic_source',
+                                            y='GeneratedTraffic')
+    channel_traffic_fig.show()
+
+    # Acquisitions channels traffic in 2025
+    channel_conversion_rate_fig = px.histogram(acquisition_channels('%Y', start_date, end_date),
+                                       x='traffic_source',
+                                       y='ConversionRate')
+    channel_conversion_rate_fig.show()
+
+    # Average number days between purchases
     customers_fig = px.histogram(customers_dimension,
                                  x='AvgPurchaseInterval')
     customers_fig.show()
