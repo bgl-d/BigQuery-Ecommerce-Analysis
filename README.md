@@ -32,22 +32,23 @@ Data aggrigated by different dimensions:
 Metrics: Revenue, AOV, Unique Users, Conversion Rate
 ![alt text](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/graphs/Revenue%20in%20the%20first%20half%20of%202025.png) 
 
-Traffic in the first half of 2025
-
 ![alt text](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/graphs/Conversion%20rates%20in%20the%20first%20half%20of%202025.png)
 
 2. **Product Dimensions (products_metrics.csv)**
 
 Metrics: Revenue, ItemsSold, Contribution to Overall Revenue
 
-Top selling items in 2025 with relative revenue
+![alt text](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/graphs/Products%20revenue.png)
+
+![alt text](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/graphs/Product%20categories%20by%20revenue.png)
 
 3. **Acquisition Channels Dimensions (acquisition_channels_metrics.csv)**
 
 Metrics: Traffic, Unique Users, Conversion Rate
 
-Traffic
-Conversion rates
+![alt text](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/graphs/Traffic%20by%20acquisition%20channel%20in%202025.png)
+
+![alt text](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/graphs/Conversion%20rate%20by%20acquisition%20channel%20in%202025.png)
 
 4. **Customer Dimensions (customer_metrics.csv)**:
 
