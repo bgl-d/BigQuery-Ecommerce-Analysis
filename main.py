@@ -25,17 +25,30 @@ def main():
     acquisition_channels_metrics = acquisition_channels('%Y-%m', start_date, end_date)
 
     # Customer metrics
-    customers_metrics = customers(start_date, end_date)
+    customers_metrics = customers()
 
     # Visualising key metrics
-    fig = px.histogram(metrics_by_period,
-                       x=metrics_by_period['Period'],
-                       y='Revenue')
-    fig.show()
-    fig_hist = px.histogram(acquisition_channels_metrics,
+    revenue_fig = px.histogram(metrics_by_period,
+                       x='Period',
+                       y='Revenue', nbins=8)
+    revenue_fig.update_layout(bargap=0.2)
+    revenue_fig.show()
+
+
+    acquisition_channels_fig = px.histogram(acquisition_channels_metrics,
                             x='Period',
-                            y='GeneratedTraffic', color='traffic_source', barmode='group')
-    fig_hist.show()
+                            y='GeneratedTraffic', color='traffic_source', barmode='group', nbins=8)
+    acquisition_channels_fig.show()
+
+    customers_fig = px.histogram(customers_metrics,
+                                 x='AvgRepeatPurchaseInterval')
+    customers_fig2 = px.histogram(customers_metrics,
+                                 x='NumOrders')
+    customers_fig2.update_layout(bargap=0.1)
+    customers_fig.show()
+    customers_fig2.show()
+
+
 
 
 if __name__ == '__main__':
