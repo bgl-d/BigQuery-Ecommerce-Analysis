@@ -31,7 +31,7 @@ Data aggrigated by different dimensions:
 
 Metrics: Revenue, AOV, Unique Users, Conversion Rate
 
-![alt text]([graphs/Revenue in the first half of 2025.png]) Revenue in the first half of 2025
+![alt text](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/graphs/Revenue%20in%20the%20first%20half%20of%202025.png) Revenue in the first half of 2025
 (picture) Traffic in the first half of 2025
 (picture) Conversion rates in the first half of 2025
 
