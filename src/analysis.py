@@ -1,8 +1,9 @@
 import pandas as pd
 from src.load_data import load_data
 
-def seasonality(granularity, start_date, end_date):
-    seasonality_query = f'''
+
+def time_based(granularity, start_date, end_date):
+    time_based_query = f'''
                             WITH orders AS (
                               SELECT
                                 FORMAT_DATE('{granularity}', created_at) AS Period,
@@ -34,9 +35,9 @@ def seasonality(granularity, start_date, end_date):
                               ON o.Period = t.Period
                             ORDER BY o.Period
     '''
-    metrics_by_month = load_data(seasonality_query)
-    print(metrics_by_month)
-    return metrics_by_month
+    time_based_dimension = load_data(time_based_query)
+    time_based_dimension.to_csv('data/time_based_dimension.csv')
+    return time_based_dimension
 
 
 def products(start_date, end_date):
@@ -55,7 +56,7 @@ def products(start_date, end_date):
                             SELECT
                               n.product_name,
                               SUM(o.sale_price) AS Revenue,
-                              SUM(o.sale_price) / COUNT(o.order_id) AS AOV,
+                              COUNT(o.order_id) AS ItemsSold,
                               SUM(o.sale_price) * 100 / SUM(SUM(o.sale_price)) OVER() AS Contribution_to_Revenue
                             FROM `bigquery-public-data.thelook_ecommerce.order_items` AS o
                             JOIN product_name_fix AS n
@@ -65,9 +66,9 @@ def products(start_date, end_date):
                             GROUP BY n.product_name
                             ORDER BY Revenue DESC
     '''
-    metrics_by_products = load_data(products_query)
-    print(metrics_by_products.head())
-    return metrics_by_products
+    products_dimension = load_data(products_query)
+    products_dimension.to_csv('data/products_dimension.csv')
+    return products_dimension
 
 
 def acquisition_channels(granularity, start_date, end_date):
@@ -83,9 +84,9 @@ def acquisition_channels(granularity, start_date, end_date):
                                 GROUP BY traffic_source, Period
                                 ORDER BY GeneratedTraffic DESC
     '''
-    acquisition_channels_metrics = load_data(acquisition_channels_query)
-    print(acquisition_channels_metrics.head())
-    return acquisition_channels_metrics
+    acquisition_channels_dimension = load_data(acquisition_channels_query)
+    acquisition_channels_dimension.to_csv('data/acquisition_channels_dimension.csv')
+    return acquisition_channels_dimension
 
 
 def customers():
@@ -108,7 +109,7 @@ def customers():
                               GROUP BY user_id, status
                             ),
                             date_dif AS(
-                              SELECT user_id, sum(day_dif)/NULLIF(COUNT(order_id)-1, 0) as AvgRepeatPurchaseInterval
+                              SELECT user_id, sum(day_dif)/NULLIF(COUNT(order_id)-1, 0) as AvgPurchaseInterval
                               FROM (
                                 SELECT *, DATE_diff(created_at, LAG(created_at, 1) OVER (PARTITION BY user_id order by created_at), 
                                 day) as day_dif
@@ -127,7 +128,7 @@ def customers():
                               r.NumOrders,
                               u.traffic_source as FirstTouchTrafficSource,
                               l.created_at as Recency,
-                              d.AvgRepeatPurchaseInterval
+                              d.AvgPurchaseInterval
                             FROM `bigquery-public-data.thelook_ecommerce.users` as u
                             JOIN last_purchase as l
                               ON u.id = l.user_id
@@ -138,6 +139,6 @@ def customers():
                             WHERE r.status = 'Complete'
                             ORDER BY CustomerRevenue DESC
     '''
-    customers_metrics = load_data(customers_query)
-    print(customers_metrics.head())
-    return customers_metrics
+    customers_dimension = load_data(customers_query)
+    customers_dimension.to_csv('data/customers_dimension.csv')
+    return customers_dimension
