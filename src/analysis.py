@@ -4,36 +4,39 @@ from src.load_data import load_data
 
 def time_based(granularity, start_date, end_date):
     time_based_query = f'''
-                            WITH orders AS (
+                            WITH revenue AS (
                               SELECT
                                 FORMAT_DATE('{granularity}', created_at) AS Period,
                                 SUM(sale_price) AS Revenue,
                                 SUM(sale_price)/COUNT(DISTINCT order_id) AS AOV,
-                                COUNT(DISTINCT user_id) AS UniqueUsers
+                                COUNT(DISTINCT user_id) AS NumCustomers
                               FROM `bigquery-public-data.thelook_ecommerce.order_items`
                               WHERE status = 'Complete' AND DATE(created_at) BETWEEN '{start_date}' AND '{end_date}'
                               GROUP BY Period
                             ),
                             traffic AS (
-                              SELECT 
+                              SELECT traffic_source,
+                                COUNT(DISTINCT session_id) as GeneratedTraffic,
                                 FORMAT_DATE('{granularity}', created_at) AS Period,
                                 (COUNT(DISTINCT CASE WHEN event_type = 'purchase' THEN session_id END)*100/
                                 COUNT(DISTINCT session_id)) AS ConversionRate
                               FROM `bigquery-public-data.thelook_ecommerce.events`
                               WHERE DATE(created_at) BETWEEN '{start_date}' AND '{end_date}'
-                              GROUP BY Period
+                              GROUP BY Period, traffic_source
                             )
                             
                             SELECT 
-                              o.Period,
-                              o.Revenue,
-                              o.AOV,
-                              o.UniqueUsers,
-                              t.ConversionRate
-                            FROM orders AS o
+                              r.Period,
+                              r.Revenue,
+                              r.AOV,
+                              r.NumCustomers,
+                              t.traffic_source,
+                              t.GeneratedTraffic,
+                              t.ConversionRate 
+                            FROM revenue AS r
                             JOIN traffic AS t
-                              ON o.Period = t.Period
-                            ORDER BY o.Period
+                              ON r.Period = t.Period
+                            ORDER BY r.Period
     '''
     time_based_dimension = load_data(time_based_query)
     time_based_dimension.to_csv('data/time_based_dimension.csv')
@@ -73,17 +76,16 @@ def products(start_date, end_date):
     return products_dimension
 
 
-def acquisition_channels(granularity, start_date, end_date):
+def acquisition_channels(start_date, end_date):
     acquisition_channels_query = f'''
                                 SELECT traffic_source,
                                   COUNT(DISTINCT session_id) as GeneratedTraffic,
                                   COUNT(DISTINCT user_id) as UniqueUsers,
                                   (COUNT(DISTINCT CASE WHEN event_type = 'purchase' THEN session_id END)*100/
-                                  COUNT(DISTINCT session_id)) AS ConversionRate,
-                                  FORMAT_DATE('{granularity}', created_at) AS Period                               
+                                  COUNT(DISTINCT session_id)) AS ConversionRate
                                 FROM `bigquery-public-data.thelook_ecommerce.events`                                
                                 WHERE DATE(created_at) BETWEEN '{start_date}' AND '{end_date}'
-                                GROUP BY traffic_source, Period
+                                GROUP BY traffic_source
                                 ORDER BY GeneratedTraffic DESC
     '''
     acquisition_channels_dimension = load_data(acquisition_channels_query)
