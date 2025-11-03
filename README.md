@@ -49,7 +49,7 @@ Metrics: Traffic, Unique Users, Conversion Rate
 
 4. **Customer Dimensions (customer_metrics.csv)**:
 
-Metrics: Revenue, Recency, NumOrders, AvgPurchaseInterval
+Metrics: Revenue, Recency, number of orders, average time between purchases
 
 ![alt text](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/graphs/Number%20of%20orders%20by%20an%20individual%20customer.png)
 ![alt text](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/graphs/Average%20interval%20between%20purchases%20in%20days.png)
