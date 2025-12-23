@@ -1,6 +1,6 @@
 # BigQuery-Ecommerce-Analysis
 ## Data
-BigQuery open dataset of a fictitious eCommerce 
+[BigQuery open dataset](https://console.cloud.google.com/bigquery(cameo:product/bigquery-public-data/thelook-ecommerce)?project=single-router-450810-i0) of a fictitious eCommerce 
 clothing site TheLook. The dataset contains information 
 about customers, products, orders, logistics, web events 
 and digital marketing campaigns. The contents of the dataset are synthetic, and are provided
