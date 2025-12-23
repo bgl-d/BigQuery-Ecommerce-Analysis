@@ -7,7 +7,7 @@ and digital marketing campaigns. The contents of the dataset are synthetic, and 
 to industry practitioners for the purpose of product 
 discovery, testing, and evaluation.
 
-Because of its artificial nature this dataset have some
+Because of its artificial nature this dataset has some
 limitations or rather simplifications. Most of the items 
 were sold only once and its relative revenue contribution 
 often equals its sale price.
