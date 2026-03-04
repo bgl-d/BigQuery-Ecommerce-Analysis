@@ -21,7 +21,7 @@ This project involves basic data manipulation for reporting and analysis purpose
 
 ## Results
 Data aggrigated by different dimensions:
-1. **Time-Based Dimensions ([time_based_metrics.csv](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/data/time_based_dimension.csv))**
+1. **Time-Based Dimensions ([time_based_metrics.csv](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/data/time_based_dimension.csv)):**
 
 Metrics: Revenue, AOV, Unique Users, Conversion Rate
 ![alt text](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/graphs/Revenue%20by%20month%20in%20the%20first%20half%20of%202025.png)
@@ -29,21 +29,21 @@ Metrics: Revenue, AOV, Unique Users, Conversion Rate
 
 We can clearly see suspected sesasonality around major holidays. 
 
-2. **Product Dimensions ([products_metrics.csv](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/data/products_dimension.csv))**
+2. **Product Dimensions ([products_metrics.csv](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/data/products_dimension.csv)):**
 
 Metrics: Revenue, ItemsSold, Contribution to Overall Revenue
 
 ![alt text](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/graphs/Products%20revenue.png)
 ![alt text](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/graphs/Product%20categories%20by%20revenue.png)
 
-3. **Acquisition Channels Dimensions ([acquisition_channels_metrics.csv](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/data/acquisition_channels_dimension.csv)**
+3. **Acquisition Channels Dimensions ([acquisition_channels_metrics.csv](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/data/acquisition_channels_dimension.csv)):**
 
 Metrics: Traffic, Unique Users, Conversion Rate
 
 ![alt text](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/graphs/Traffic%20by%20acquisition%20channel%20in%202025.png)
 ![alt text](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/graphs/Conversion%20rate%20by%20acquisition%20channel%20in%202025.png)
 
-4. **Customer Dimensions ([customer_metrics.csv](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/data/customers_dimension.csv)**:
+4. **Customer Dimensions ([customer_metrics.csv](https://github.com/bgl-d/BigQuery-Ecommerce-Analysis/blob/main/data/customers_dimension.csv)):**:
 
 Metrics: Revenue, Recency, number of orders, average time between purchases
 
